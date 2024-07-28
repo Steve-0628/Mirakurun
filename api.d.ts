@@ -278,7 +278,11 @@ export interface ConfigChannelsItem {
     name: string;
     type: ChannelType;
     /** passed to tuning command */
-    channel: string;
+    // channel: string;
+    channel: {
+        type: ChannelType,
+        channel: string,
+    }
     satellite?: string;
     serviceId?: number;
     space?: number;

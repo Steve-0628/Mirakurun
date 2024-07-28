@@ -66,8 +66,8 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
         })();
     }, [saved]);
 
-    const docker = uiState.status.process.env.DOCKER === "YES";
-    const ipv6Ready = docker === false || uiState.status.process.env.DOCKER_NETWORK === "host";
+    const docker = uiState.status.process?.env.DOCKER === "YES";
+    const ipv6Ready = docker === false || uiState.status.process?.env.DOCKER_NETWORK === "host";
     const changed = JSON.stringify(current) !== JSON.stringify(editing);
 
     let invalid = false;
@@ -94,13 +94,21 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
 
     return (
         <>
+            <div>
+                Not Implmented
+            </div>
+        </>
+    )
+
+    return (
+        <>
             {!current && <Spinner size={SpinnerSize.large} />}
             {editing &&
                 <Stack tokens={{ childrenGap: "8 0" }}>
                     <Dropdown
                         label="LogLevel"
                         styles={{ dropdown: { display: "inline-block" } }}
-                        disabled={docker && typeof uiState.status.process.env.LOG_LEVEL === "string"}
+                        disabled={docker && typeof uiState.status.process?.env.LOG_LEVEL === "string"}
                         onRenderLabel={(props) => (
                             <Stack horizontal verticalAlign="end">
                                 <Label>{props.label}</Label>
@@ -245,10 +253,6 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
                         }}
                     />
 
-                    <Stack horizontal tokens={{ childrenGap: "0 8" }} style={{ marginTop: 16 }}>
-                        <PrimaryButton text="Save" disabled={!changed || invalid} onClick={() => setShowSaveDialog(true)} />
-                        <DefaultButton text="Cancel" disabled={!changed} onClick={() => setEditing({ ...current })} />
-                    </Stack>
                 </Stack>
             }
             <Dialog

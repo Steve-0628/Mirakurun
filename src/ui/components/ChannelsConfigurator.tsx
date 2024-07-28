@@ -38,7 +38,7 @@ import {
 import { UIState } from "../index";
 import { ConfigChannels, ChannelType } from "../../../api";
 
-const configAPI = "/api/config/channels";
+const configAPI = "/api/services";
 
 interface Item {
     key: string;
@@ -47,7 +47,6 @@ interface Item {
     type: JSX.Element;
     channel: JSX.Element;
     options: JSX.Element;
-    controls: JSX.Element;
 }
 
 const columns: IColumn[] = [
@@ -86,13 +85,6 @@ const columns: IColumn[] = [
         minWidth: 200,
         // maxWidth: 400
     },
-    {
-        key: "col-controls",
-        name: "",
-        fieldName: "controls",
-        minWidth: 120,
-        maxWidth: 120
-    }
 ];
 
 const dummySelection = new Selection(); // dummy
@@ -167,23 +159,23 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
                         { key: "CS", text: "CS" },
                         { key: "SKY", text: "SKY" }
                     ]}
-                    selectedKey={ch.type}
+                    selectedKey={ch.channel.type}
                     onChange={(ev, option) => {
-                        ch.type = option.key as any;
+                        ch.channel.type = option.key as any;
                         setEditing([...editing]);
                     }}
                 />
             ),
             channel: (
                 <TextField
-                    value={ch.channel}
+                    value={ch.channel.channel}
                     onChange={(ev, newValue) => {
-                        ch.channel = newValue;
+                        ch.channel.channel = newValue;
                         setEditing([...editing]);
                     }}
                     onBlur={() => {
-                        if (ch.channel === "") {
-                            ch.channel = "0";
+                        if (ch.channel.channel === "") {
+                            ch.channel.channel = "0";
                             setEditing([...editing]);
                         }
                     }}
@@ -286,45 +278,6 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
                     </Stack>
                 </Stack>
             ),
-            controls: (
-                <Stack horizontal horizontalAlign="end">
-                    <IconButton
-                        disabled={i === 0}
-                        style={{ opacity: i === 0 ? 0 : 1 }}
-                        title="Up"
-                        iconProps={{ iconName: "Up" }}
-                        onClick={() => {
-                            editing.splice(i, 1);
-                            editing.splice(i - 1, 0, ch);
-                            setEditing([...editing]);
-                        }}
-                    />
-                    <IconButton
-                        disabled={i === editing.length - 1}
-                        style={{ opacity: i === editing.length - 1 ? 0 : 1 }}
-                        title="Down"
-                        iconProps={{ iconName: "Down" }}
-                        onClick={() => {
-                            editing.splice(i, 1);
-                            editing.splice(i + 1, 0, ch);
-                            setEditing([...editing]);
-                        }}
-                    />
-                    <IconButton
-                        title="Controls"
-                        iconProps={{ iconName: "More" }}
-                        menuProps={{ items: [{
-                            key: "remove",
-                            text: "Remove Channel",
-                            iconProps: { iconName: "Delete" },
-                            onClick: () => {
-                                editing.splice(i, 1);
-                                setEditing([...editing]);
-                            }
-                        }] }}
-                    />
-                </Stack>
-            )
         };
         //
         items.push(item);
@@ -341,25 +294,6 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
             {!current && <Spinner size={SpinnerSize.large} />}
             {editing &&
                 <Stack tokens={{ childrenGap: "8 0" }}>
-                    <Stack.Item>
-                        <ActionButton
-                            text="Add Channel"
-                            iconProps={{ iconName: "Add" }}
-                            onClick={() => {
-                                const i = editing.length;
-                                editing.push({
-                                    name: `ch${i}`,
-                                    type: "GR",
-                                    channel: "0",
-                                    isDisabled: true
-                                });
-                                setEditing([...editing]);
-                                setTimeout(() => {
-                                    listContainerRef.current.scrollTop = listContainerRef.current.scrollHeight;
-                                }, 0);
-                            }}
-                        />
-                    </Stack.Item>
 
                     <div ref={listContainerRef} style={{ overflowY: "scroll" }}>
                         <DetailsList
@@ -371,10 +305,6 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
                         />
                     </div>
 
-                    <Stack horizontal tokens={{ childrenGap: "0 8" }} style={{ marginTop: 16 }}>
-                        <PrimaryButton text="Save" disabled={!changed} onClick={() => setShowSaveDialog(true)} />
-                        <DefaultButton text="Cancel" disabled={!changed} onClick={() => setEditing(JSON.parse(JSON.stringify(current)))} />
-                    </Stack>
                 </Stack>
             }
             <Dialog

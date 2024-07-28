@@ -39,7 +39,7 @@ import {
 import { UIState } from "../index";
 import { ConfigTuners, ChannelType } from "../../../api";
 
-const configAPI = "/api/config/tuners";
+const configAPI = "/api/tuners";
 
 interface Item {
     key: string;
@@ -47,7 +47,6 @@ interface Item {
     name: JSX.Element;
     types: JSX.Element;
     options: JSX.Element;
-    controls: JSX.Element;
 }
 
 const columns: IColumn[] = [
@@ -79,13 +78,6 @@ const columns: IColumn[] = [
         minWidth: 340,
         // maxWidth: 400
     },
-    {
-        key: "col-controls",
-        name: "",
-        fieldName: "controls",
-        minWidth: 120,
-        maxWidth: 120
-    }
 ];
 
 const dummySelection = new Selection(); // dummy
@@ -260,45 +252,6 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
                     )}
                 </Stack>
             ),
-            controls: (
-                <Stack horizontal horizontalAlign="end">
-                    <IconButton
-                        disabled={i === 0}
-                        style={{ opacity: i === 0 ? 0 : 1 }}
-                        title="Up"
-                        iconProps={{ iconName: "Up" }}
-                        onClick={() => {
-                            editing.splice(i, 1);
-                            editing.splice(i - 1, 0, tuner);
-                            setEditing([...editing]);
-                        }}
-                    />
-                    <IconButton
-                        disabled={i === editing.length - 1}
-                        style={{ opacity: i === editing.length - 1 ? 0 : 1 }}
-                        title="Down"
-                        iconProps={{ iconName: "Down" }}
-                        onClick={() => {
-                            editing.splice(i, 1);
-                            editing.splice(i + 1, 0, tuner);
-                            setEditing([...editing]);
-                        }}
-                    />
-                    <IconButton
-                        title="Controls"
-                        iconProps={{ iconName: "More" }}
-                        menuProps={{ items: [{
-                            key: "remove",
-                            text: "Remove Tuner",
-                            iconProps: { iconName: "Delete" },
-                            onClick: () => {
-                                editing.splice(i, 1);
-                                setEditing([...editing]);
-                            }
-                        }] }}
-                    />
-                </Stack>
-            )
         };
         //
         items.push(item);
@@ -315,27 +268,6 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
             {!current && <Spinner size={SpinnerSize.large} />}
             {editing &&
                 <Stack tokens={{ childrenGap: "8 0" }}>
-                    <Stack.Item>
-                        <ActionButton
-                            text="Add Tuner"
-                            iconProps={{ iconName: "Add" }}
-                            onClick={() => {
-                                const i = editing.length;
-                                editing.push({
-                                    name: `adapter${i}`,
-                                    types: [],
-                                    command: `dvbv5-zap -a ${i} -c ./config/dvbconf-for-isdb/conf/dvbv5_channels_isdbs.conf -r -P <channel>`,
-                                    dvbDevicePath: `/dev/dvb/adapter${i}/dvr0`,
-                                    decoder: "arib-b25-stream-test",
-                                    isDisabled: true
-                                });
-                                setEditing([...editing]);
-                                setTimeout(() => {
-                                    listContainerRef.current.scrollTop = listContainerRef.current.scrollHeight;
-                                }, 0);
-                            }}
-                        />
-                    </Stack.Item>
 
                     <div ref={listContainerRef} style={{ overflowY: "scroll" }}>
                         <DetailsList
@@ -347,10 +279,10 @@ const Configurator: React.FC<{ uiState: UIState, uiStateEvents: EventEmitter }> 
                         />
                     </div>
 
-                    <Stack horizontal tokens={{ childrenGap: "0 8" }} style={{ marginTop: 16 }}>
+                    {/* <Stack horizontal tokens={{ childrenGap: "0 8" }} style={{ marginTop: 16 }}>
                         <PrimaryButton text="Save" disabled={!changed} onClick={() => setShowSaveDialog(true)} />
                         <DefaultButton text="Cancel" disabled={!changed} onClick={() => setEditing(JSON.parse(JSON.stringify(current)))} />
-                    </Stack>
+                    </Stack> */}
                 </Stack>
             }
             <Dialog

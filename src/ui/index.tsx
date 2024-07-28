@@ -104,106 +104,30 @@ const rpc = new RPCClient(`${location.protocol === "https:" ? "wss:" : "ws:"}//$
     protocols: null
 });
 
-rpc.on("connecting", () => {
+status: {
+    uiState.status = await (await fetch("/api/status")).json();
 
-    console.log("rpc:connecting");
+    const current_version = (await (await fetch("/api/version")).json()).current;
+    uiState.status.version = current_version;
+    uiState.version = current_version
+}
+services: {
+    uiState.services = await (await fetch("/api/services")).json();
 
-    uiState.statusName = "Connecting";
-    uiStateEvents.emit("update");
-});
-
-rpc.on("connected", async () => {
-
-    console.log("rpc:connected");
-
-    status: {
-        uiState.status = await rpc.call("getStatus");
-
-        statusRefreshInterval = setInterval(async () => {
-            if (document.hidden) {
-                return;
-            }
-            uiState.status = await rpc.call("getStatus");
-            uiStateEvents.emit("update:status");
-        }, 1000 * 3);
-
-        if (uiState.version !== ".." && uiState.version !== uiState.status.version) {
-            location.reload();
+    servicesRefreshInterval = setInterval(async () => {
+        if (document.hidden) {
             return;
         }
-        uiState.version = uiState.status.version;
-    }
-    services: {
-        uiState.services = await (await fetch("/api/services")).json();
-
-        servicesRefreshInterval = setInterval(async () => {
-            if (document.hidden) {
-                return;
-            }
-            uiState.services = await (await fetch("/api/services")).json();
-            uiStateEvents.emit("update:services");
-        }, 1000 * 60);
-    }
-    uiState.tuners = await (await fetch("/api/tuners")).json();
-
-    await rpc.call("join", {
-        rooms: ["events:tuner", "events:service"]
-    } as JoinParams);
-
-    uiStateEvents.emit("update");
-    uiStateEvents.emit("update:status");
-    uiStateEvents.emit("update:services");
-    uiStateEvents.emit("update:tuners");
-});
-
-rpc.on("disconnect", () => {
-
-    console.log("rpc:disconnected");
-
-    clearInterval(statusRefreshInterval);
-    clearInterval(servicesRefreshInterval);
-
-    uiState.statusName = "Disconnected";
-    uiState.statusIconName = "offline";
-    uiStateEvents.emit("update");
-});
-
-rpc.methods.set("events", async (socket, { array }: NotifyParams<EventMessage>) => {
-
-    let reloadServiceRequired = false;
-
-    for (const event of array) {
-        if (event.resource === "service") {
-            const service: Service = event.data;
-            reloadServiceRequired = true;
-
-            for (const _service of uiState.services) {
-                if (_service.id === service.id) {
-                    Object.assign(_service, service);
-                    uiStateEvents.emit("update:services");
-                    reloadServiceRequired = false;
-                    break;
-                }
-            }
-        } else if (event.resource === "tuner") {
-            const tuner: TunerDevice = event.data;
-
-            uiState.tuners[uiState.tuners.findIndex(value => value.index === tuner.index)] = tuner;
-            uiStateEvents.emit("update:tuners");
-        }
-    }
-
-    if (reloadServiceRequired) {
         uiState.services = await (await fetch("/api/services")).json();
         uiStateEvents.emit("update:services");
-    }
+    }, 1000 * 60);
+}
+uiState.tuners = await (await fetch("/api/tuners")).json();
 
-    uiStateEvents.emit("data:events", array);
-});
-
-rpc.methods.set("logs", (socket, { array }: NotifyParams<string> ) => {
-    uiStateEvents.emit("data:logs", array);
-});
+uiStateEvents.emit("update");
+uiStateEvents.emit("update:status");
+uiStateEvents.emit("update:services");
+uiStateEvents.emit("update:tuners");
 
 const Content = () => {
 
@@ -249,7 +173,6 @@ const Content = () => {
                         target="_blank"
                         href="/api/debug"
                     />
-                    <Restart uiStateEvents={uiStateEvents} />
                 </Stack>
 
                 <Pivot>
@@ -264,9 +187,6 @@ const Content = () => {
                     </PivotItem>
                     <PivotItem itemIcon="Settings" headerText="Config">
                         <ConfigView uiState={uiState} uiStateEvents={uiStateEvents} />
-                    </PivotItem>
-                    <PivotItem itemIcon="Heart" headerText="Special Thanks">
-                        <HeartView />
                     </PivotItem>
                 </Pivot>
 
@@ -325,3 +245,5 @@ const myTheme = createTheme({
     }
 });
 loadTheme(myTheme);
+
+uiStateEvents.emit("update");

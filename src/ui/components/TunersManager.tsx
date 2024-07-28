@@ -113,20 +113,6 @@ const TunersManager: React.FC<{ tuners: TunerDevice[] }> = ({ tuners }) => {
                 </>
             )
         };
-        if (tuner.command) {
-            item.controls = (
-                <IconButton
-                    title="Controls"
-                    iconProps={{ iconName: "More" }}
-                    menuProps={{ items: [{
-                        key: "kill",
-                        text: "Kill Tuner Process...",
-                        iconProps: { iconName: "Cancel" },
-                        onClick: () => setKillTarget(tuner.index)
-                    }] }}
-                />
-            );
-        }
         items.push(item);
 
         for (const user of tuner.users) {
