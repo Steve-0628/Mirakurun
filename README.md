@@ -1,5 +1,13 @@
 [![Mirakurun](https://gist.githubusercontent.com/kanreisa/0ab27d7771e97edce5a24cc81b9b8ce6/raw/e50683f1c4e7d1a13e9ef468f8cc945b0dbc853c/logo-mirakurun.svg)](https://github.com/Chinachu/Mirakurun)
 
+# This fork
+
+This fork intends to provide partial working webui for [mirakc](https://github.com/mirakc/mirakc) because it provides only webapis.
+
+There are a lot of components missing, not working, showing errors, but it kinds of works.
+
+Please, DO NOT USE this fork as your main tuner service. This fork is NOT INTENDED to be used as a tuner service, but to only use the frontend part.
+
 # Mirakurun
 
 DVR Tuner Server for Japanese TV which designed for the "Air" (in development codename).
